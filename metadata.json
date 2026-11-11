@@ -1,0 +1,6 @@
+{
+  "name": "Graph & AI Engineer Interactive Portfolio",
+  "description": "Interactive portfolio featuring professional projects, career highlights, and an embedded Neo4j knowledge graph explorer powered by Vis-Network.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

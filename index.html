@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>김상훈 | Graph & AI Data Engineer Portfolio</title>
+  <meta name="description" content="지식 그래프(Knowledge Graph), Neo4j, 대용량 분산 파이프라인 및 Graph RAG 전문 엔지니어 김상훈의 인터랙티브 포트폴리오입니다." />
+  <meta property="og:title" content="김상훈 | Graph & AI Data Engineer Portfolio" />
+  <meta property="og:description" content="Neo4j 기반 지식그래프 탐색기, 프로젝트 아키텍처 및 엔터프라이즈 데이터 엔지니어링 포트폴리오" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            canvas: '#090d16',
+            surface: '#0f172a',
+            surfaceBorder: '#1e293b',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Vis-Network CDN -->
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+  <style>
+    body {
+      background-color: #080c14;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Ambient backdrop grid */
+    .bg-grid-pattern {
+      background-size: 36px 36px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    /* Vis Network Canvas container */
+    #graph-network {
+      width: 100%;
+      height: 640px;
+      background-color: #0b0f19;
+      outline: none;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+  </style>
+</head>
+<body class="selection:bg-indigo-500/30 selection:text-indigo-200 min-h-screen flex flex-col">
+
+  <!-- ============================================================ -->
+  <!-- 1. STICKY TOP NAVIGATION BAR -->
+  <!-- ============================================================ -->
+  <header class="sticky top-0 z-50 w-full bg-[#080c14]/90 backdrop-blur-md border-b border-slate-800/80 transition-all duration-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
+      <!-- Zone 1: Brand Wordmark -->
+      <a href="#" class="flex items-center gap-3 group shrink-0">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white font-bold text-base shadow-sm shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+          <i data-lucide="network" class="w-5 h-5"></i>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-base font-bold tracking-tight text-white group-hover:text-indigo-300 transition-colors whitespace-nowrap">
+            김상훈 <span class="font-normal text-slate-400 text-xs">· Sanghoon Kim</span>
+          </span>
+          <span class="text-[11px] text-slate-400 font-medium tracking-wide">Graph & AI Data Engineer</span>
+        </div>
+      </a>
+
+      <!-- Zone 2: Navigation Links -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+        <a href="#about" class="hover:text-white transition-colors whitespace-nowrap">자기소개</a>
+        <a href="#projects" class="hover:text-white transition-colors whitespace-nowrap">프로젝트</a>
+        <a href="#explorer" class="hover:text-white transition-colors flex items-center gap-1.5 whitespace-nowrap">
+          <span>데이터 탐색</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        </a>
+      </nav>
+
+      <!-- Zone 3: Primary Actions & Mobile Toggle -->
+      <div class="flex items-center gap-3 shrink-0">
+        <button onclick="copyEmail()" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-slate-200 bg-slate-800/90 hover:bg-slate-700 hover:text-white rounded-lg border border-slate-700/80 transition-all whitespace-nowrap">
+          <i data-lucide="mail" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>이메일 복사</span>
+        </button>
+        <a href="#contact" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm shadow-indigo-600/30 transition-all whitespace-nowrap">
+          <span>연락하기</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+
+        <!-- Mobile hamburger -->
+        <button id="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="메뉴 열기" class="md:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile dropdown menu -->
+    <div id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 bg-[#0b0f19] border-b border-slate-800 space-y-2">
+      <a href="#about" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800">자기소개 (About)</a>
+      <a href="#projects" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800">프로젝트 (Projects)</a>
+      <a href="#explorer" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-sm font-medium text-emerald-400 hover:bg-slate-800">데이터 탐색 (Data Explorer)</a>
+      <a href="#contact" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800">문의하기 (Contact)</a>
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- 2. HERO SECTION -->
+  <!-- ============================================================ -->
+  <section class="relative pt-16 pb-20 overflow-hidden bg-grid-pattern border-b border-slate-800/80">
+    <!-- Ambient glow gradients -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[360px] bg-indigo-600/10 blur-[130px] rounded-full pointer-events-none"></div>
+    <div class="absolute top-1/3 left-1/4 w-[350px] h-[300px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Left: Text Content -->
+        <div class="lg:col-span-7 space-y-6">
+          <!-- Kicker -->
+          <div class="inline-flex items-center gap-2 text-xs font-semibold text-indigo-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+            <span>KNOWLEDGE GRAPH · NEO4J · GRAPH RAG · DATA PLATFORM</span>
+          </div>
+
+          <!-- Main Headline -->
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.18] text-balance">
+            복잡한 비정형 데이터에서<br class="hidden sm:inline" />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-emerald-400">구조화된 지식 그래프</span>를<br class="hidden sm:inline" />
+            연결하고 실체화합니다.
+          </h1>
+
+          <!-- Lead Paragraph -->
+          <p class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl">
+            Neo4j 기반 온톨로지 모델링과 대용량 분산 파이프라인, 그리고 LLM 하이브리드 Graph RAG를 전문으로 다루는 엔지니어 김상훈입니다. 파편화된 데이터를 의미론적 네트워크로 조직하여 탐색 속도와 AI 질의 정확도를 극대화합니다.
+          </p>
+
+          <!-- Quick Action Buttons -->
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <a href="#explorer" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/25 transition-all">
+              <i data-lucide="share-2" class="w-4 h-4"></i>
+              <span>네트워크 그래프 탐색기</span>
+            </a>
+            <a href="#projects" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-slate-200 bg-slate-800/90 hover:bg-slate-700 hover:text-white border border-slate-700/80 transition-all">
+              <i data-lucide="folder-git-2" class="w-4 h-4 text-slate-400"></i>
+              <span>프로젝트 포트폴리오</span>
+            </a>
+            <div class="flex items-center gap-2 pl-2">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="p-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition-all">
+                <i data-lucide="github" class="w-4 h-4"></i>
+              </a>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="p-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition-all">
+                <i data-lucide="linkedin" class="w-4 h-4"></i>
+              </a>
+              <button onclick="copyEmail()" aria-label="이메일 복사" title="이메일 주소 복사" class="p-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition-all">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Interactive Graph Preview Card -->
+        <div class="lg:col-span-5">
+          <div class="glass-card rounded-2xl p-6 relative overflow-hidden border border-slate-700/60 shadow-xl">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                <span class="text-xs font-mono text-slate-400 ml-2">neo4j://auradb.enterprise.graph</span>
+              </div>
+              <span class="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/50">CONNECTED</span>
+            </div>
+
+            <!-- Cypher Snippet -->
+            <div class="font-mono text-xs text-slate-300 space-y-1 bg-[#070a10] p-3.5 rounded-lg border border-slate-800/80">
+              <div class="text-slate-400">// Neo4j Cypher Seed Snapshot</div>
+              <div><span class="text-indigo-400">MATCH</span> (p:Person {name: <span class="text-emerald-300">"김상훈"</span>})</div>
+              <div><span class="text-indigo-400">MATCH</span> (p)-[r:<span class="text-sky-300">LEADS</span>]->(proj:<span class="text-amber-300">Project</span>)</div>
+              <div><span class="text-indigo-400">MATCH</span> (proj)-[:<span class="text-sky-300">USES_TECH</span>]->(t:<span class="text-purple-300">Tech</span>)</div>
+              <div><span class="text-indigo-400">RETURN</span> p, r, proj, t <span class="text-slate-400">LIMIT 10;</span></div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs">
+              <div class="text-slate-400">
+                <span class="text-white font-semibold tabular-nums">28</span> Nodes · 
+                <span class="text-white font-semibold tabular-nums">46</span> Edges · 
+                <span class="text-white font-semibold tabular-nums">5</span> Domains
+              </div>
+              <a href="#explorer" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                <span>실시간 탐색하기</span>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Metrics Strip (Full-width below hero split) -->
+      <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <div class="glass-card rounded-xl p-5 border border-slate-800">
+          <div class="text-2xl sm:text-3xl font-extrabold text-white font-mono tabular-nums">100M+</div>
+          <div class="text-xs text-slate-400 mt-1">대용량 노드 & 엣지 파이프라인 처리</div>
+        </div>
+        <div class="glass-card rounded-xl p-5 border border-slate-800">
+          <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono tabular-nums">68% ↓</div>
+          <div class="text-xs text-slate-400 mt-1">Graph RAG 도입 후 LLM 환각률 감소</div>
+        </div>
+        <div class="glass-card rounded-xl p-5 border border-slate-800">
+          <div class="text-2xl sm:text-3xl font-extrabold text-indigo-400 font-mono tabular-nums">4.2x ↑</div>
+          <div class="text-xs text-slate-400 mt-1">다중 홉(Multi-Hop) 지식 질의 가속화</div>
+        </div>
+        <div class="glass-card rounded-xl p-5 border border-slate-800">
+          <div class="text-2xl sm:text-3xl font-extrabold text-sky-400 font-mono tabular-nums">99.9%</div>
+          <div class="text-xs text-slate-400 mt-1">실시간 이상탐지 파이프라인 가동률</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 3. ABOUT & COMPETENCIES SECTION -->
+  <!-- ============================================================ -->
+  <section id="about" class="py-20 border-b border-slate-800/80 bg-[#080c14]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="max-w-3xl mb-14">
+        <span class="text-xs font-semibold text-indigo-400 tracking-wider">ABOUT & EXPERTISE</span>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mt-2 tracking-tight">
+          단편적인 테이블을 넘어, 의미와 맥락을 연결합니다.
+        </h2>
+        <p class="text-base text-slate-300 mt-3 leading-relaxed">
+          데이터 엔지니어링의 본질은 단순히 대용량 데이터를 옮기는 것이 아니라, 비즈니스 엔티티 간의 유기적 관계를 찾아내어 가치 있는 통찰로 전환하는 것입니다. Neo4j, Apache Spark, Kafka 및 최신 LLM 프레임워크를 기반으로 확장 가능하고 견고한 데이터 인프라를 만듭니다.
+        </p>
+      </div>
+
+      <!-- Core Competencies Grid (4 Columns) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Card 1 -->
+        <div class="glass-card rounded-xl p-6 border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4">
+              <i data-lucide="database" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Knowledge Graph & Neo4j</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              엔터프라이즈 도메인 온톨로지 설계, Neo4j 클러스터 구축, Cypher 쿼리 프로파일링 및 APOC/GDS 프로시저 최적화.
+            </p>
+          </div>
+          <div class="text-[11px] font-mono text-indigo-300/90 pt-3 border-t border-slate-800">
+            Neo4j Enterprise · Cypher · APOC · GDS
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="glass-card rounded-xl p-6 border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4">
+              <i data-lucide="cpu" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Graph RAG & GenAI</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              벡터 검색과 지식그래프 순회를 결합한 하이브리드 RAG 파이프라인. 엔티티 자동 추출 및 사실 기반 환각 방지 시스템.
+            </p>
+          </div>
+          <div class="text-[11px] font-mono text-emerald-300/90 pt-3 border-t border-slate-800">
+            LangChain · LlamaIndex · PyTorch · FastEmbed
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="glass-card rounded-xl p-6 border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 mb-4">
+              <i data-lucide="workflow" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Distributed Data Pipeline</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              Spark를 통한 수억 건 배치 분산 적재 및 Kafka를 활용한 초당 수천 건 실시간 스트리밍 인제스천 아키텍처.
+            </p>
+          </div>
+          <div class="text-[11px] font-mono text-sky-300/90 pt-3 border-t border-slate-800">
+            Apache Spark · Kafka · Airflow · Docker
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="glass-card rounded-xl p-6 border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4">
+              <i data-lucide="activity" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Graph Analytics & Viz</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              PageRank, Louvain 커뮤니티 탐지, FastRP 노드 임베딩 분석 및 Vis.js/D3.js 기반 인터랙티브 탐색 대시보드 구축.
+            </p>
+          </div>
+          <div class="text-[11px] font-mono text-amber-300/90 pt-3 border-t border-slate-800">
+            GDS Algorithms · Vis.js · D3.js · NetworkX
+          </div>
+        </div>
+      </div>
+
+      <!-- Career History Timeline & Contact Summary -->
+      <div class="mt-16 grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <!-- Career Timeline (7 cols) -->
+        <div class="lg:col-span-7 space-y-6">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="briefcase" class="w-5 h-5 text-indigo-400"></i>
+            <span>경력 이력 (Professional Timeline)</span>
+          </h3>
+
+          <div class="border-l border-slate-800 pl-6 space-y-8 relative">
+            <!-- Timeline Item 1 -->
+            <div class="relative group">
+              <div class="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-indigo-500 ring-4 ring-[#080c14]"></div>
+              <div class="flex items-center gap-2 text-xs text-indigo-400 font-mono">
+                <span>2024 - PRESENT</span>
+                <span>·</span>
+                <span>Lead Graph & AI Architect</span>
+              </div>
+              <h4 class="text-base font-bold text-white mt-1">DataIntelligence Lab</h4>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                엔터프라이즈 사내 비정형 문서 50만 건 대상 Graph RAG 플랫폼 총괄 아키텍처 설계. Neo4j 클러스터링 및 벡터 검색 하이브리드 파이프라인 개발로 환각율 68% 절감.
+              </p>
+            </div>
+
+            <!-- Timeline Item 2 -->
+            <div class="relative group">
+              <div class="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-sky-500 ring-4 ring-[#080c14]"></div>
+              <div class="flex items-center gap-2 text-xs text-sky-400 font-mono">
+                <span>2022 - 2024</span>
+                <span>·</span>
+                <span>Senior Data Platform Engineer</span>
+              </div>
+              <h4 class="text-base font-bold text-white mt-1">FinGraph Technologies</h4>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                초당 2,500건 거래 네트워크에서 대포통장 및 자금세탁 순환 거래를 실시간 탐지하는 Neo4j + Kafka 스트리밍 엔진 구축. 이상 거래 조기 적발률 3.4배 개선.
+              </p>
+            </div>
+
+            <!-- Timeline Item 3 -->
+            <div class="relative group">
+              <div class="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-[#080c14]"></div>
+              <div class="flex items-center gap-2 text-xs text-emerald-400 font-mono">
+                <span>2020 - 2022</span>
+                <span>·</span>
+                <span>Graph Data Scientist</span>
+              </div>
+              <h4 class="text-base font-bold text-white mt-1">Nexa BioHealth</h4>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                PubMed 1,200만 건 논문 및 임상 데이터를 연결하는 의생명 온톨로지 구축. 유전자-질병-약물 상호작용 지식베이스 쿼리 속도 14일에서 15분으로 단축.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Box & Quick Message (5 cols) -->
+        <div id="contact" class="lg:col-span-5">
+          <div class="glass-card rounded-2xl p-6 border border-slate-800">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
+              <i data-lucide="send" class="w-5 h-5 text-indigo-400"></i>
+              <span>연락 및 협업 문의 (Contact)</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-6">
+              지식 그래프 구축, 엔터프라이즈 Graph RAG 전환, 데이터 아키텍처 컨설팅 또는 채용 관련 논의는 언제든 환영합니다.
+            </p>
+
+            <div class="space-y-3 text-xs mb-6">
+              <div class="flex items-center justify-between p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                <span class="text-slate-400">Email</span>
+                <span class="font-mono text-white select-all">hijack070916@gmail.com</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                <span class="text-slate-400">Location</span>
+                <span class="text-white">Seoul, South Korea</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                <span class="text-slate-400">Response Time</span>
+                <span class="text-emerald-400">24시간 이내 회신</span>
+              </div>
+            </div>
+
+            <!-- Quick Mail Form -->
+            <form onsubmit="handleContactSubmit(event)" class="space-y-3">
+              <div>
+                <input type="text" id="contact-name" required placeholder="성함 또는 기업명" class="w-full px-3 py-2 text-xs bg-slate-900/90 border border-slate-700/80 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" />
+              </div>
+              <div>
+                <input type="email" id="contact-email" required placeholder="회신받으실 이메일 주소" class="w-full px-3 py-2 text-xs bg-slate-900/90 border border-slate-700/80 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" />
+              </div>
+              <div>
+                <textarea id="contact-message" required rows="3" placeholder="프로젝트 문의 또는 메시지를 입력해 주세요." class="w-full px-3 py-2 text-xs bg-slate-900/90 border border-slate-700/80 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors resize-none"></textarea>
+              </div>
+              <button type="submit" class="w-full py-2.5 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2">
+                <i data-lucide="mail-check" class="w-4 h-4"></i>
+                <span>메시지 보내기</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 4. PROJECTS SECTION -->
+  <!-- ============================================================ -->
+  <section id="projects" class="py-20 border-b border-slate-800/80 bg-[#070a10]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <div>
+          <span class="text-xs font-semibold text-indigo-400 tracking-wider">PORTFOLIO SHOWCASE</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1 tracking-tight">주요 프로젝트 및 아키텍처 성과</h2>
+        </div>
+        <!-- Project Filter Buttons -->
+        <div class="flex items-center gap-1.5 p-1 bg-slate-900/90 border border-slate-800 rounded-lg overflow-x-auto">
+          <button onclick="filterProjects('all', this)" data-filter="all" class="proj-tab-btn active px-3 py-1.5 text-xs font-medium rounded-md transition-colors bg-indigo-600 text-white whitespace-nowrap">전체 (All)</button>
+          <button onclick="filterProjects('rag', this)" data-filter="rag" class="proj-tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-white whitespace-nowrap">Graph RAG</button>
+          <button onclick="filterProjects('fintech', this)" data-filter="fintech" class="proj-tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-white whitespace-nowrap">금융 이상탐지</button>
+          <button onclick="filterProjects('biomed', this)" data-filter="biomed" class="proj-tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-white whitespace-nowrap">바이오 온톨로지</button>
+          <button onclick="filterProjects('platform', this)" data-filter="platform" class="proj-tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-white whitespace-nowrap">데이터 플랫폼</button>
+        </div>
+      </div>
+
+      <!-- Projects Grid -->
+      <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Project Card 1: Enterprise Graph RAG Engine -->
+        <div class="project-card glass-card rounded-xl p-6 border border-slate-800 flex flex-col justify-between transition-all duration-300" data-category="rag">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
+              <span class="text-indigo-400 font-medium">Enterprise AI · GenAI</span>
+              <span>2024 - Present</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2 leading-snug">Enterprise Graph RAG Engine</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              비정형 엔지니어링 문서 50만 건에서 온톨로지 및 엔티티를 자동 추출하여 Neo4j 지식그래프를 구축하고, 벡터 검색과 다중 홉 그래프 탐색을 융합한 차세대 질의응답 플랫폼.
+            </p>
+
+            <div class="space-y-2 mb-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">LLM 환각 감소율</span>
+                <span class="text-emerald-400 font-bold font-mono">68% 감소</span>
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">Hit Rate @ 5 정확도</span>
+                <span class="text-indigo-400 font-bold font-mono">94.2%</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 mb-5">
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Neo4j</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Cypher</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">LangChain</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">FastAPI</span>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+            <button onclick="openProjectModal('proj_graph_rag')" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+              <span>상세 아키텍처 보기</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="focusGraphNode('proj_graph_rag')" class="text-xs font-medium text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition-colors">
+              <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+              <span>그래프에서 보기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Project Card 2: Financial Fraud Ring Detection -->
+        <div class="project-card glass-card rounded-xl p-6 border border-slate-800 flex flex-col justify-between transition-all duration-300" data-category="fintech">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
+              <span class="text-sky-400 font-medium">FinTech · Anti-Fraud</span>
+              <span>2023 - 2024</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2 leading-snug">Financial Fraud Ring Detection</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              초당 2,500건 이상의 금융 거래 스트림에서 대포통장 조직 및 자금세탁 순환 거래(Circular Transaction Pattern)를 실시간으로 색출하는 그래프 이상거래 탐지 엔진.
+            </p>
+
+            <div class="space-y-2 mb-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">조직적 사기 적발률</span>
+                <span class="text-emerald-400 font-bold font-mono">3.4배 향상</span>
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">오탐률(False Positive)</span>
+                <span class="text-indigo-400 font-bold font-mono">42% 절감</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 mb-5">
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Neo4j GDS</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Kafka</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Louvain</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Python</span>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+            <button onclick="openProjectModal('proj_fraud_graph')" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+              <span>상세 아키텍처 보기</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="focusGraphNode('proj_fraud_graph')" class="text-xs font-medium text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition-colors">
+              <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+              <span>그래프에서 보기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Project Card 3: BioMed Knowledge Mesh -->
+        <div class="project-card glass-card rounded-xl p-6 border border-slate-800 flex flex-col justify-between transition-all duration-300" data-category="biomed">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
+              <span class="text-emerald-400 font-medium">Bioinformatics · Ontology</span>
+              <span>2022 - 2023</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2 leading-snug">BioMed Knowledge Mesh</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              PubMed 의학 논문 1,200만 편 및 전임상 시험 데이터셋에서 질병-유전자 변이-약물 표적 간의 상호작용 지식을 Neo4j로 통합 연결한 신약 연구용 지식망.
+            </p>
+
+            <div class="space-y-2 mb-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">타겟 발굴 쿼리 시간</span>
+                <span class="text-emerald-400 font-bold font-mono">14일 → 15분</span>
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">데이터 통합 규모</span>
+                <span class="text-indigo-400 font-bold font-mono">1,200만 건</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 mb-5">
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Neo4j</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Apache Spark</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">GraphX</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">NLP</span>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+            <button onclick="openProjectModal('proj_med_knowledge')" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+              <span>상세 아키텍처 보기</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="focusGraphNode('proj_med_knowledge')" class="text-xs font-medium text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition-colors">
+              <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+              <span>그래프에서 보기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Project Card 4: Real-time Graph Recommendation -->
+        <div class="project-card glass-card rounded-xl p-6 border border-slate-800 flex flex-col justify-between transition-all duration-300" data-category="platform">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
+              <span class="text-amber-400 font-medium">E-Commerce · Recommendation</span>
+              <span>2021 - 2022</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2 leading-snug">Session Graph Recommendation</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              실시간 세션 클릭스트림과 장바구니 동시 구매 이력을 동적 이분 그래프(Bipartite Graph)로 모델링하여 실시간 연관 상품 및 대안 상품을 추천하는 시스템.
+            </p>
+
+            <div class="space-y-2 mb-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">추천 클릭률 (CTR)</span>
+                <span class="text-emerald-400 font-bold font-mono">+28.4% 상승</span>
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">장바구니 전환율</span>
+                <span class="text-indigo-400 font-bold font-mono">+16.7% 개선</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 mb-5">
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Neo4j GDS</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Node2Vec</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Redis</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">FastAPI</span>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+            <button onclick="openProjectModal('proj_commerce_rec')" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+              <span>상세 아키텍처 보기</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="focusGraphNode('proj_commerce_rec')" class="text-xs font-medium text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition-colors">
+              <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+              <span>그래프에서 보기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Project Card 5: Enterprise Data Lineage & Governance -->
+        <div class="project-card glass-card rounded-xl p-6 border border-slate-800 flex flex-col justify-between transition-all duration-300" data-category="platform">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
+              <span class="text-purple-400 font-medium">Data Lineage · Governance</span>
+              <span>2020 - 2021</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2 leading-snug">Enterprise Data Lineage Portal</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              사내 2,000개 이상의 RDBMS 테이블과 Spark ETL 작업 간의 업/다운스트림 종속성을 그래프로 매핑하여 데이터 변경 시 장애 영향도를 사전에 시뮬레이션하는 포털.
+            </p>
+
+            <div class="space-y-2 mb-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">장애 원인 분석 시간</span>
+                <span class="text-emerald-400 font-bold font-mono">85% 단축</span>
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">데이터 거버넌스 준수</span>
+                <span class="text-indigo-400 font-bold font-mono">100% 달성</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 mb-5">
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Vis.js</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Neo4j</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">PostgreSQL</span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">Airflow</span>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+            <button onclick="openProjectModal('proj_data_lineage')" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+              <span>상세 아키텍처 보기</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="focusGraphNode('proj_data_lineage')" class="text-xs font-medium text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition-colors">
+              <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+              <span>그래프에서 보기</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 5. DATA EXPLORER (NEO4J INTERACTIVE GRAPH) -->
+  <!-- ============================================================ -->
+  <section id="explorer" class="py-20 bg-[#080c14] relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-400 mb-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>EMBEDDED NEO4J KNOWLEDGE GRAPH ENGINE</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            인터랙티브 데이터 탐색기 (Data Explorer)
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+            프로젝트, 보유 기술 스택, 전문 역량 및 핵심 성과 간의 유기적 관계망입니다. 노드를 클릭하여 세부 속성과 연결 관계를 검사하거나 직접 드래그하여 조작해 보세요.
+          </p>
+        </div>
+
+        <!-- Raw Data & Cypher Export Modal Trigger -->
+        <div class="flex items-center gap-2">
+          <button onclick="openDataModal()" class="px-3.5 py-2 text-xs font-semibold text-slate-200 bg-slate-800/90 hover:bg-slate-700 hover:text-white rounded-lg border border-slate-700/80 transition-all flex items-center gap-2 whitespace-nowrap">
+            <i data-lucide="file-code" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <span>Neo4j CSV / Cypher 원본 데이터</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Graph Explorer Container with Top Toolbar & Canvas -->
+      <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden relative shadow-2xl">
+        <!-- Explorer Toolbar -->
+        <div class="p-3.5 bg-[#0d1322] border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <!-- Search box & Category Pills -->
+          <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+            <div class="relative w-48 sm:w-60">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2"></i>
+              <input 
+                type="text" 
+                id="graph-search" 
+                placeholder="노드 이름 또는 기술 검색..." 
+                oninput="handleGraphSearch(event)"
+                class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+              />
+            </div>
+
+            <!-- Category Filter Buttons -->
+            <div class="flex items-center gap-1 overflow-x-auto py-1">
+              <button onclick="filterGraphGroup('all', this)" class="cat-pill active px-2.5 py-1 rounded bg-slate-800 text-white font-medium hover:bg-slate-700 transition-colors whitespace-nowrap">전체</button>
+              <button onclick="filterGraphGroup('Project', this)" class="cat-pill px-2.5 py-1 rounded bg-slate-900 text-indigo-300 font-medium hover:bg-slate-800 transition-colors whitespace-nowrap">프로젝트</button>
+              <button onclick="filterGraphGroup('Tech', this)" class="cat-pill px-2.5 py-1 rounded bg-slate-900 text-cyan-300 font-medium hover:bg-slate-800 transition-colors whitespace-nowrap">기술 스택</button>
+              <button onclick="filterGraphGroup('Skill', this)" class="cat-pill px-2.5 py-1 rounded bg-slate-900 text-emerald-300 font-medium hover:bg-slate-800 transition-colors whitespace-nowrap">전문 역량</button>
+              <button onclick="filterGraphGroup('Domain', this)" class="cat-pill px-2.5 py-1 rounded bg-slate-900 text-amber-300 font-medium hover:bg-slate-800 transition-colors whitespace-nowrap">도메인</button>
+              <button onclick="filterGraphGroup('Outcome', this)" class="cat-pill px-2.5 py-1 rounded bg-slate-900 text-rose-300 font-medium hover:bg-slate-800 transition-colors whitespace-nowrap">정량 성과</button>
+            </div>
+          </div>
+
+          <!-- Preset Scenarios & Canvas Controls -->
+          <div class="flex items-center gap-2 shrink-0">
+            <!-- Preset buttons -->
+            <button onclick="applyPreset('rag')" title="Graph RAG 관련 서브그래프 하이라이트" class="px-2.5 py-1 rounded bg-indigo-950/70 text-indigo-300 border border-indigo-800/60 hover:bg-indigo-900 transition-colors whitespace-nowrap font-medium">
+              ⚡ Graph RAG 서브그래프
+            </button>
+            <button onclick="applyPreset('all')" title="전체 그래프 보기" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white transition-colors whitespace-nowrap">
+              초기화
+            </button>
+
+            <div class="h-4 w-[1px] bg-slate-700 mx-1"></div>
+
+            <!-- Zoom & Physics controls -->
+            <div class="flex items-center gap-1 bg-slate-900 p-0.5 rounded-lg border border-slate-800">
+              <button onclick="zoomGraph(1.2)" title="확대" class="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded">
+                <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="zoomGraph(0.8)" title="축소" class="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded">
+                <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="resetGraphView()" title="화면 맞춤" class="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded">
+                <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button id="physics-toggle-btn" onclick="togglePhysics()" title="물리 엔진 일시정지/재개" class="p-1.5 text-emerald-400 hover:bg-slate-800 rounded">
+                <i data-lucide="pause" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Graph Network Canvas Area with Relative Slide-in Inspector -->
+        <div class="relative w-full h-[640px]">
+          <div id="graph-network"></div>
+
+          <!-- Node Detail Inspector (Slide-over drawer on right) -->
+          <div id="node-inspector" class="absolute top-4 right-4 bottom-4 w-80 sm:w-96 glass-card rounded-xl border border-slate-700/80 p-5 shadow-2xl flex flex-col justify-between overflow-y-auto transform translate-x-[120%] transition-transform duration-300 z-20">
+            <div>
+              <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-800">
+                <div>
+                  <span id="inspector-badge" class="text-[10px] font-mono px-2 py-0.5 rounded font-semibold uppercase">Category</span>
+                  <h3 id="inspector-title" class="text-lg font-bold text-white mt-1">Node Title</h3>
+                </div>
+                <button onclick="closeInspector()" class="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <!-- Node Description -->
+              <div class="mt-4">
+                <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">상세 설명</h4>
+                <p id="inspector-desc" class="text-xs text-slate-300 mt-1.5 leading-relaxed bg-slate-900/60 p-3 rounded-lg border border-slate-800"></p>
+              </div>
+
+              <!-- Node Properties Table -->
+              <div class="mt-4">
+                <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">주요 속성 (Properties)</h4>
+                <div id="inspector-props" class="mt-2 space-y-1.5 text-xs"></div>
+              </div>
+
+              <!-- Connected Edges List -->
+              <div class="mt-4">
+                <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">연결 관계 (Relationships)</h4>
+                <div id="inspector-edges" class="mt-2 space-y-1.5 max-h-40 overflow-y-auto pr-1"></div>
+              </div>
+
+              <!-- Cypher Query Snippet -->
+              <div class="mt-4">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Cypher 질의</h4>
+                  <button onclick="copyInspectorCypher()" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-mono">복사</button>
+                </div>
+                <pre id="inspector-cypher" class="text-[11px] font-mono text-indigo-300/90 bg-[#06080e] p-2.5 rounded border border-slate-800 mt-1.5 overflow-x-auto whitespace-pre-wrap"></pre>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs mt-4">
+              <span class="text-slate-500 font-mono text-[10px]">Neo4j Knowledge Node</span>
+              <button onclick="closeInspector()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-medium">닫기</button>
+            </div>
+          </div>
+
+          <!-- Bottom Legend Overlay -->
+          <div class="absolute bottom-4 left-4 glass-card rounded-lg px-3 py-2 border border-slate-800 text-[11px] flex flex-wrap items-center gap-3 shadow-lg pointer-events-auto">
+            <span class="text-slate-400 font-medium">범례:</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#8b5cf6]"></span><span class="text-slate-300">엔지니어</span></span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#6366f1]"></span><span class="text-slate-300">프로젝트</span></span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#06b6d4]"></span><span class="text-slate-300">기술스택</span></span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#10b981]"></span><span class="text-slate-300">전문역량</span></span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></span><span class="text-slate-300">도메인</span></span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#ec4899]"></span><span class="text-slate-300">정량성과</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 6. RAW DATA & CYPHER EXPORT MODAL -->
+  <!-- ============================================================ -->
+  <div id="data-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl border border-slate-700 max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="database" class="w-5 h-5 text-indigo-400"></i>
+          <h3 class="text-lg font-bold text-white">Neo4j 원본 데이터셋 & Cypher 스크립트</h3>
+        </div>
+        <button onclick="closeDataModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div class="flex items-center border-b border-slate-800 px-5 pt-3 gap-4 text-xs font-semibold">
+        <button onclick="switchDataTab('nodes')" id="tab-btn-nodes" class="data-tab-btn pb-2 text-indigo-400 border-b-2 border-indigo-500">Nodes CSV (28개)</button>
+        <button onclick="switchDataTab('edges')" id="tab-btn-edges" class="data-tab-btn pb-2 text-slate-400 hover:text-white border-b-2 border-transparent">Relationships CSV (46개)</button>
+        <button onclick="switchDataTab('cypher')" id="tab-btn-cypher" class="data-tab-btn pb-2 text-slate-400 hover:text-white border-b-2 border-transparent">Neo4j Cypher Seed</button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="p-5 flex-1 overflow-y-auto">
+        <!-- Nodes CSV -->
+        <div id="tab-content-nodes" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400">CSV 형식 노드 데이터셋</span>
+            <button onclick="downloadCSV('nodes')" class="px-3 py-1 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded flex items-center gap-1.5">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>nodes.csv 다운로드</span>
+            </button>
+          </div>
+          <pre id="nodes-csv-text" class="text-xs font-mono text-slate-300 bg-[#070a10] p-4 rounded-lg border border-slate-800 max-h-96 overflow-auto whitespace-pre"></pre>
+        </div>
+
+        <!-- Edges CSV -->
+        <div id="tab-content-edges" class="hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400">CSV 형식 관계(Edges) 데이터셋</span>
+            <button onclick="downloadCSV('edges')" class="px-3 py-1 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded flex items-center gap-1.5">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>relationships.csv 다운로드</span>
+            </button>
+          </div>
+          <pre id="edges-csv-text" class="text-xs font-mono text-slate-300 bg-[#070a10] p-4 rounded-lg border border-slate-800 max-h-96 overflow-auto whitespace-pre"></pre>
+        </div>
+
+        <!-- Cypher Script -->
+        <div id="tab-content-cypher" class="hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400">Neo4j AuraDB 및 Desktop에서 바로 실행 가능한 Cypher 생성 스크립트</span>
+            <button onclick="copyCypherFull()" class="px-3 py-1 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded flex items-center gap-1.5">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Cypher 전체 복사</span>
+            </button>
+          </div>
+          <pre id="cypher-full-text" class="text-xs font-mono text-indigo-300/90 bg-[#070a10] p-4 rounded-lg border border-slate-800 max-h-96 overflow-auto whitespace-pre"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 7. PROJECT ARCHITECTURE DETAIL MODAL -->
+  <!-- ============================================================ -->
+  <div id="project-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl border border-slate-700 max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="p-6 border-b border-slate-800 flex items-start justify-between">
+        <div>
+          <span id="proj-modal-domain" class="text-xs font-mono text-indigo-400">DOMAIN</span>
+          <h3 id="proj-modal-title" class="text-xl font-bold text-white mt-1">Project Title</h3>
+        </div>
+        <button onclick="closeProjectModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-5 text-xs text-slate-300">
+        <div>
+          <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+            <i data-lucide="compass" class="w-4 h-4 text-indigo-400"></i>
+            <span>프로젝트 개요 & 배경</span>
+          </h4>
+          <p id="proj-modal-desc" class="leading-relaxed bg-slate-900/60 p-3.5 rounded-lg border border-slate-800"></p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+            <i data-lucide="layers" class="w-4 h-4 text-sky-400"></i>
+            <span>핵심 아키텍처 및 구현 방식</span>
+          </h4>
+          <p id="proj-modal-arch" class="leading-relaxed bg-slate-900/60 p-3.5 rounded-lg border border-slate-800"></p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+            <i data-lucide="award" class="w-4 h-4 text-emerald-400"></i>
+            <span>정량적 성과 및 임팩트</span>
+          </h4>
+          <div id="proj-modal-impact" class="space-y-1.5"></div>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+            <i data-lucide="code" class="w-4 h-4 text-amber-400"></i>
+            <span>핵심 Cypher 질의 예시</span>
+          </h4>
+          <pre id="proj-modal-cypher" class="font-mono text-[11px] text-indigo-300/90 bg-[#06080e] p-3 rounded-lg border border-slate-800 overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 flex items-center justify-between">
+        <button id="proj-modal-graph-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg flex items-center gap-1.5 text-xs">
+          <i data-lucide="crosshair" class="w-4 h-4"></i>
+          <span>데이터 탐색기에서 노드 확인</span>
+        </button>
+        <button onclick="closeProjectModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-lg text-xs">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl border border-indigo-500/50 shadow-2xl flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-message">알림 메시지</span>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 8. FOOTER -->
+  <!-- ============================================================ -->
+  <footer class="mt-auto border-t border-slate-800 bg-[#060911] text-xs text-slate-400 py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-md bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">
+          <i data-lucide="network" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <span class="text-white font-bold">김상훈</span>
+          <span class="text-slate-400 ml-1">· Knowledge Graph & AI Engineer</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <a href="#about" class="hover:text-white transition-colors">자기소개</a>
+        <a href="#projects" class="hover:text-white transition-colors">프로젝트</a>
+        <a href="#explorer" class="hover:text-white transition-colors">데이터 탐색기</a>
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">GitHub</a>
+        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">LinkedIn</a>
+      </div>
+
+      <div class="text-slate-400">
+        © 2026 Sanghoon Kim. Designed with Neo4j & Vis-Network.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- 9. EMBEDDED DATASET & CORE APPLICATION SCRIPTS -->
+  <!-- ============================================================ -->
+  <script>
+    // -------------------------------------------------------------
+    // EMBEDDED NEO4J DATASET (Nodes & Relationships)
+    // Standalone, self-contained, no external CORS or server dependency
+    // -------------------------------------------------------------
+    const NEO4J_GRAPH_DATA = {
+      nodes: [
+        // Person
+        {
+          id: "sanghoon_kim",
+          label: "김상훈\n(Engineer)",
+          group: "Person",
+          role: "Lead Graph & AI Engineer",
+          desc: "지식 그래프(Knowledge Graph), 대규모 분산 파이프라인, Neo4j 및 Graph RAG 전문 엔지니어입니다.",
+          email: "hijack070916@gmail.com",
+          experience: "5+ Years",
+          location: "Seoul, KR"
+        },
+        // Projects
+        {
+          id: "proj_graph_rag",
+          label: "Enterprise\nGraph RAG",
+          group: "Project",
+          domain: "Enterprise AI / GenAI",
+          period: "2024 - Present",
+          role: "Lead Architect",
+          desc: "50만 건의 기술 문서에서 온톨로지를 자동 추출하고, 벡터 검색과 Cypher 그래프 탐색을 결합한 하이브리드 RAG 플랫폼.",
+          impact: "LLM 환각 68% 감소, Hit Rate@5 94.2% 달성",
+          tech: "Neo4j, Cypher, LangChain, FastAPI",
+          arch: "문서 임베딩 벡터와 그래프 개체 온톨로지를 단일 통합 파이프라인으로 연결하여 다중 홉(Multi-Hop) 추론 성능 극대화",
+          cypherExample: "MATCH (q:Query)-[:REQUIRES_CONTEXT]->(e:Entity)\nMATCH (e)-[r:RELATED_TO*1..2]-(ctx)\nRETURN e, r, ctx LIMIT 20;"
+        },
+        {
+          id: "proj_fraud_graph",
+          label: "Fraud Ring\nDetection",
+          group: "Project",
+          domain: "FinTech / Anti-Fraud",
+          period: "2023 - 2024",
+          role: "Senior Data Engineer",
+          desc: "실시간 금융 거래 네트워크(초당 2,500건)에서 대포통장 및 자금세탁 순환 거래를 실시간 탐지하는 그래프 분석 시스템.",
+          impact: "사기 적발률 3.4배 향상, 오탐률 42% 감소",
+          tech: "Neo4j GDS, Kafka, Louvain, Python",
+          arch: "Kafka 스트림으로 유입되는 실시간 송금 이벤트를 Neo4j에 그래프 적재 후, Louvain 커뮤니티 알고리즘과 순환 경로(Cycle) 매칭으로 이상 패턴 격리",
+          cypherExample: "MATCH path = (a:Account)-[:TRANSFERRED_TO*3..6]->(a)\nWHERE all(r in relationships(path) WHERE r.amount > 5000000)\nRETURN path LIMIT 10;"
+        },
+        {
+          id: "proj_med_knowledge",
+          label: "BioMed\nKnowledge Mesh",
+          group: "Project",
+          domain: "Bioinformatics / Healthcare",
+          period: "2022 - 2023",
+          role: "Graph Data Scientist",
+          desc: "PubMed 1,200만 건 의학 논문 및 임상 데이터를 연결하여 질병-유전자-약물 간의 상호작용 지식베이스 구축.",
+          impact: "신약 타겟 발굴 질의 시간 14일 → 15분 단축",
+          tech: "Neo4j, Apache Spark, GraphX, BioNLP",
+          arch: "대규모 BioNLP 파이프라인으로 의생명 엔티티를 추출하고 Apache Spark GraphX로 분산 병합하여 고신뢰성 지식 온톨로지 생성",
+          cypherExample: "MATCH (d:Disease {name: 'Diabetes'})<-[:ASSOCIATED_WITH]-(g:Gene)-[:TARGETED_BY]->(dr:Drug)\nRETURN d, g, dr;"
+        },
+        {
+          id: "proj_commerce_rec",
+          label: "Session Graph\nRecSys",
+          group: "Project",
+          domain: "E-Commerce",
+          period: "2021 - 2022",
+          role: "ML / Data Engineer",
+          desc: "사용자 실시간 행동 그래프(Session & Co-purchase graph) 기반 협업 필터링 및 Node2Vec 그래프 임베딩 추천 시스템.",
+          impact: "추천 클릭률(CTR) +28.4%, 장바구니 전환율 +16.7%",
+          tech: "Neo4j GDS, Node2Vec, Redis, FastAPI",
+          arch: "실시간 세션 클릭 스트림을 동적 이분 그래프로 갱신하고 Node2Vec 임베딩 유사도를 계산하여 서브 50ms 이내에 대안 상품 추천",
+          cypherExample: "MATCH (u:Session {id: $sessionId})-[:VIEWED]->(p:Product)\nMATCH (p)<-[:VIEWED]-(:Session)-[:VIEWED]->(rec:Product)\nWHERE NOT (u)-[:VIEWED]->(rec)\nRETURN rec, count(*) AS score ORDER BY score DESC LIMIT 5;"
+        },
+        {
+          id: "proj_data_lineage",
+          label: "Data Lineage\nPortal",
+          group: "Project",
+          domain: "Data Governance",
+          period: "2020 - 2021",
+          role: "Platform Engineer",
+          desc: "사내 2,000+ 테이블 및 ETL 파이프라인 종속성을 그래프로 시각화하고 데이터 변경 시 영향도를 자동 분석하는 거버넌스 포털.",
+          impact: "데이터 장애 원인 분석 소요 시간 85% 단축, 감사 규정 준수 100%",
+          tech: "Vis.js, Neo4j, Apache Spark, Airflow",
+          arch: "Airflow DAG 메타데이터 및 RDBMS 스키마를 수집하여 데이터 원천(Source)부터 최종 마트(Mart)까지의 경로를 실시간 시각화",
+          cypherExample: "MATCH path = (src:Table {name: 'raw_orders'})-[:TRANSFORMED_BY*1..5]->(dest:Table)\nRETURN path;"
+        },
+
+        // Tech Stack
+        {
+          id: "tech_neo4j",
+          label: "Neo4j\nEnterprise",
+          group: "Tech",
+          category: "Graph Database",
+          desc: "ACID를 완벽히 준수하는 네이티브 그래프 데이터베이스. 온톨로지 모델링, 고성능 인덱싱, 클러스터링 관리."
+        },
+        {
+          id: "tech_cypher",
+          label: "Cypher\nQuery Lang",
+          group: "Tech",
+          category: "Graph Query",
+          desc: "선언적 그래프 질의 언어. 다중 홉 패턴 매칭, 서브그래프 프로파일링, APOC 커스텀 프로시저 작성."
+        },
+        {
+          id: "tech_gds",
+          label: "Neo4j GDS\n(Data Science)",
+          group: "Tech",
+          category: "Algorithms",
+          desc: "Graph Data Science 라이브러리. PageRank, Louvain 커뮤니티 탐지, FastRP/Node2Vec 임베딩."
+        },
+        {
+          id: "tech_langchain",
+          label: "LangChain &\nLlamaIndex",
+          group: "Tech",
+          category: "AI Framework",
+          desc: "GraphCypherQAChain 및 지식그래프 기반 하이브리드 RAG 파이프라인 구축."
+        },
+        {
+          id: "tech_spark",
+          label: "Apache Spark\n& GraphX",
+          group: "Tech",
+          category: "Big Data",
+          desc: "대규모 데이터 분산 배치 파이프라인. GraphX를 통한 분산 그래프 알고리즘 수행."
+        },
+        {
+          id: "tech_kafka",
+          label: "Apache\nKafka",
+          group: "Tech",
+          category: "Streaming",
+          desc: "초당 수천 건의 고속 이벤트 스트리밍 및 Neo4j 실시간 싱크(Sink) 파이프라인."
+        },
+        {
+          id: "tech_python",
+          label: "Python &\nFastAPI",
+          group: "Tech",
+          category: "Backend",
+          desc: "비동기 고성능 REST API, neo4j-python-driver 커넥션 풀링 최적화."
+        },
+        {
+          id: "tech_visjs",
+          label: "Vis.js &\nD3.js",
+          group: "Tech",
+          category: "Visualization",
+          desc: "웹 브라우저 상의 대용량 네트워크 토폴로지 렌더링 및 인터랙티브 탐색 UI 구현."
+        },
+
+        // Skills
+        {
+          id: "skill_ontology",
+          label: "온톨로지 &\n스키마 설계",
+          group: "Skill",
+          desc: "비정형 데이터 및 복잡한 비즈니스 규칙을 노드와 관계로 추상화하는 지식 모델링 역량."
+        },
+        {
+          id: "skill_rag",
+          label: "Graph RAG &\n하이브리드 검색",
+          group: "Skill",
+          desc: "비정형 벡터 검색과 정형 그래프 경로 탐색을 융합하여 LLM 답변의 사실성과 설명력을 확보."
+        },
+        {
+          id: "skill_tuning",
+          label: "Cypher 성능\n튜닝 & 프로파일링",
+          group: "Skill",
+          desc: "인덱스 최적화, 메모리 튜닝, 서브그래프 분할 및 EXPLAIN/PROFILE을 통한 쿼리 가속."
+        },
+        {
+          id: "skill_pipeline",
+          label: "실시간 분산\nETL 파이프라인",
+          group: "Skill",
+          desc: "Kafka와 Spark를 결합하여 수억 건의 이벤트를 무중단으로 적재/가공하는 인프라 설계."
+        },
+        {
+          id: "skill_analytics",
+          label: "네트워크 분석 &\n커뮤니티 탐지",
+          group: "Skill",
+          desc: "중심성(Centrality), 군집 분석, 순환 거래 탐지 등 비선형 관계 속 패턴 규명."
+        },
+        {
+          id: "skill_fullstack",
+          label: "인터랙티브\n데이터 시각화",
+          group: "Skill",
+          desc: "비즈니스 사용자와 분석가가 복잡한 그래프를 직관적으로 탐색할 수 있는 웹 UI/UX 개발."
+        },
+
+        // Domains
+        {
+          id: "domain_genai",
+          label: "생성형 AI &\n지식베이스",
+          group: "Domain",
+          desc: "사내 문서 지능화, 기업 위키 지식그래프화, 고신뢰성 QA 플랫폼 도메인."
+        },
+        {
+          id: "domain_fintech",
+          label: "금융 및 이상거래\n(FinTech)",
+          group: "Domain",
+          desc: "자금세탁방지(AML), 보이스피싱 통장 순환 거래 탐지, 대출 사기 네트워크 분석."
+        },
+        {
+          id: "domain_biomed",
+          label: "바이오메디컬 &\n헬스케어",
+          group: "Domain",
+          desc: "의학 논문 지식그래프, 질병-약물 타깃 분석, 임상 시험 프로토콜 매칭."
+        },
+        {
+          id: "domain_commerce",
+          label: "이커머스 &\n추천 시스템",
+          group: "Domain",
+          desc: "사용자 실시간 구매/조회 여정 그래프 모델링 및 초개인화 추천."
+        },
+
+        // Outcomes
+        {
+          id: "metric_hallucination",
+          label: "환각 68% ↓\n(Accuracy)",
+          group: "Outcome",
+          desc: "정형 사실 기반 지식그래프 참조를 통해 LLM 환각률을 획기적으로 개선."
+        },
+        {
+          id: "metric_speed",
+          label: "탐색 4.2배 ↑\n(Speed)",
+          group: "Outcome",
+          desc: "인덱싱과 Cypher 튜닝으로 복잡 다중 홉(Multi-Hop) 질의 속도 고속화."
+        },
+        {
+          id: "metric_scale",
+          label: "1억 건+ 적재\n(Scalability)",
+          group: "Outcome",
+          desc: "Apache Spark와 Neo4j 분산 파이프라인으로 대용량 데이터 안정적 수용."
+        },
+        {
+          id: "metric_fraud",
+          label: "사기 탐지 3.4x\n(Detection)",
+          group: "Outcome",
+          desc: "순환 그래프 패턴 매칭을 통해 지능형 금융 사기 조직을 조기 적발."
+        }
+      ],
+
+      edges: [
+        // Person to Projects
+        { from: "sanghoon_kim", to: "proj_graph_rag", label: "LEADS" },
+        { from: "sanghoon_kim", to: "proj_fraud_graph", label: "DEVELOPED" },
+        { from: "sanghoon_kim", to: "proj_med_knowledge", label: "DEVELOPED" },
+        { from: "sanghoon_kim", to: "proj_commerce_rec", label: "ENGINEERED" },
+        { from: "sanghoon_kim", to: "proj_data_lineage", label: "ARCHITECTED" },
+
+        // Person to Skills
+        { from: "sanghoon_kim", to: "skill_ontology", label: "MASTERED" },
+        { from: "sanghoon_kim", to: "skill_rag", label: "SPECIALIZED" },
+        { from: "sanghoon_kim", to: "skill_tuning", label: "SPECIALIZED" },
+        { from: "sanghoon_kim", to: "skill_pipeline", label: "ENGINEERED" },
+
+        // Project Graph RAG
+        { from: "proj_graph_rag", to: "tech_neo4j", label: "USES_TECH" },
+        { from: "proj_graph_rag", to: "tech_cypher", label: "USES_TECH" },
+        { from: "proj_graph_rag", to: "tech_langchain", label: "USES_TECH" },
+        { from: "proj_graph_rag", to: "tech_python", label: "USES_TECH" },
+        { from: "proj_graph_rag", to: "domain_genai", label: "APPLIED_IN" },
+        { from: "proj_graph_rag", to: "metric_hallucination", label: "DELIVERED" },
+        { from: "proj_graph_rag", to: "skill_rag", label: "REQUIRES" },
+
+        // Project Fraud Graph
+        { from: "proj_fraud_graph", to: "tech_neo4j", label: "USES_TECH" },
+        { from: "proj_fraud_graph", to: "tech_gds", label: "USES_TECH" },
+        { from: "proj_fraud_graph", to: "tech_kafka", label: "USES_TECH" },
+        { from: "proj_fraud_graph", to: "domain_fintech", label: "APPLIED_IN" },
+        { from: "proj_fraud_graph", to: "metric_fraud", label: "DELIVERED" },
+        { from: "proj_fraud_graph", to: "skill_analytics", label: "REQUIRES" },
+
+        // Project BioMed
+        { from: "proj_med_knowledge", to: "tech_neo4j", label: "USES_TECH" },
+        { from: "proj_med_knowledge", to: "tech_spark", label: "USES_TECH" },
+        { from: "proj_med_knowledge", to: "domain_biomed", label: "APPLIED_IN" },
+        { from: "proj_med_knowledge", to: "metric_speed", label: "DELIVERED" },
+        { from: "proj_med_knowledge", to: "skill_ontology", label: "REQUIRES" },
+
+        // Project Commerce RecSys
+        { from: "proj_commerce_rec", to: "tech_neo4j", label: "USES_TECH" },
+        { from: "proj_commerce_rec", to: "tech_gds", label: "USES_TECH" },
+        { from: "proj_commerce_rec", to: "domain_commerce", label: "APPLIED_IN" },
+        { from: "proj_commerce_rec", to: "skill_analytics", label: "REQUIRES" },
+
+        // Project Data Lineage
+        { from: "proj_data_lineage", to: "tech_visjs", label: "USES_TECH" },
+        { from: "proj_data_lineage", to: "tech_spark", label: "USES_TECH" },
+        { from: "proj_data_lineage", to: "metric_scale", label: "DELIVERED" },
+        { from: "proj_data_lineage", to: "skill_fullstack", label: "REQUIRES" },
+
+        // Tech Relationships
+        { from: "tech_neo4j", to: "tech_cypher", label: "NATIVE_LANG" },
+        { from: "tech_neo4j", to: "tech_gds", label: "EXTENDS" },
+        { from: "tech_langchain", to: "tech_cypher", label: "GENERATES" },
+        { from: "tech_spark", to: "tech_neo4j", label: "BULK_LOADS" },
+        { from: "tech_kafka", to: "tech_neo4j", label: "STREAM_SINKS" },
+
+        // Skills to Tech
+        { from: "skill_rag", to: "tech_langchain", label: "LEVERAGES" },
+        { from: "skill_tuning", to: "tech_cypher", label: "PROFILES" },
+        { from: "skill_analytics", to: "tech_gds", label: "IMPLEMENTS" },
+        { from: "skill_pipeline", to: "tech_spark", label: "EXECUTES" },
+        { from: "skill_pipeline", to: "tech_kafka", label: "INGESTS" },
+        { from: "skill_fullstack", to: "tech_visjs", label: "RENDERS" }
+      ]
+    };
+
+    // Color Palette per Group
+    const GROUP_COLORS = {
+      Person: { background: "#8b5cf6", border: "#a78bfa", text: "#ffffff", size: 36, shape: "hexagon" },
+      Project: { background: "#6366f1", border: "#818cf8", text: "#ffffff", size: 30, shape: "dot" },
+      Tech: { background: "#06b6d4", border: "#38bdf8", text: "#ffffff", size: 24, shape: "dot" },
+      Skill: { background: "#10b981", border: "#34d399", text: "#ffffff", size: 24, shape: "dot" },
+      Domain: { background: "#f59e0b", border: "#fbbf24", text: "#ffffff", size: 22, shape: "diamond" },
+      Outcome: { background: "#ec4899", border: "#f472b6", text: "#ffffff", size: 24, shape: "box" }
+    };
+
+    // Global Network Instance and Data Sets
+    let network = null;
+    let nodesDataSet = null;
+    let edgesDataSet = null;
+    let physicsEnabled = true;
+    let currentSelectedNodeId = null;
+
+    // -------------------------------------------------------------
+    // INITIALIZE GRAPH
+    // -------------------------------------------------------------
+    function initNetwork() {
+      const container = document.getElementById("graph-network");
+      if (!container || typeof vis === "undefined") return;
+
+      // Transform nodes with styling
+      const formattedNodes = NEO4J_GRAPH_DATA.nodes.map(n => {
+        const style = GROUP_COLORS[n.group] || GROUP_COLORS.Tech;
+        return {
+          id: n.id,
+          label: n.label,
+          group: n.group,
+          shape: style.shape,
+          size: style.size,
+          color: {
+            background: style.background,
+            border: style.border,
+            highlight: {
+              background: style.background,
+              border: "#ffffff"
+            },
+            hover: {
+              background: style.background,
+              border: "#ffffff"
+            }
+          },
+          font: {
+            color: "#f8fafc",
+            size: n.group === "Person" ? 14 : 11,
+            face: '"Plus Jakarta Sans", sans-serif',
+            multi: true,
+            strokeWidth: 3,
+            strokeColor: "#090d16"
+          },
+          borderWidth: 2,
+          shadow: {
+            enabled: true,
+            color: "rgba(0,0,0,0.5)",
+            size: 10,
+            x: 2,
+            y: 4
+          }
+        };
+      });
+
+      // Transform edges with styling
+      const formattedEdges = NEO4J_GRAPH_DATA.edges.map(e => ({
+        id: `${e.from}->${e.to}`,
+        from: e.from,
+        to: e.to,
+        label: e.label,
+        font: {
+          color: "#94a3b8",
+          size: 9,
+          face: '"JetBrains Mono", monospace',
+          strokeWidth: 2,
+          strokeColor: "#0b0f19",
+          align: "middle"
+        },
+        arrows: {
+          to: {
+            enabled: true,
+            scaleFactor: 0.75
+          }
+        },
+        color: {
+          color: "rgba(148, 163, 184, 0.35)",
+          highlight: "#818cf8",
+          hover: "#38bdf8"
+        },
+        smooth: {
+          type: "curvedCW",
+          roundness: 0.15
+        },
+        width: 1.5
+      }));
+
+      nodesDataSet = new vis.DataSet(formattedNodes);
+      edgesDataSet = new vis.DataSet(formattedEdges);
+
+      const data = {
+        nodes: nodesDataSet,
+        edges: edgesDataSet
+      };
+
+      const options = {
+        interaction: {
+          hover: true,
+          tooltipDelay: 100,
+          zoomView: true,
+          dragView: true,
+          dragNodes: true,
+          navigationButtons: false,
+          keyboard: false
+        },
+        physics: {
+          enabled: true,
+          barnesHut: {
+            gravitationalConstant: -3800,
+            centralGravity: 0.25,
+            springLength: 120,
+            springConstant: 0.04,
+            damping: 0.09,
+            avoidOverlap: 0.3
+          },
+          stabilization: {
+            enabled: true,
+            iterations: 150,
+            updateInterval: 25
+          }
+        }
+      };
+
+      network = new vis.Network(container, data, options);
+
+      // Event: Click on node
+      network.on("click", function(params) {
+        if (params.nodes.length > 0) {
+          const nodeId = params.nodes[0];
+          showNodeInspector(nodeId);
+          network.focus(nodeId, {
+            scale: 1.25,
+            animation: {
+              duration: 500,
+              easingFunction: "easeInOutQuad"
+            }
+          });
+        } else {
+          closeInspector();
+        }
+      });
+
+      // Event: Hover highlights 1st-degree neighbors
+      network.on("hoverNode", function(params) {
+        container.style.cursor = "pointer";
+      });
+      network.on("blurNode", function(params) {
+        container.style.cursor = "default";
+      });
+
+      // Fit after stabilization
+      network.once("stabilizationIterationsDone", function() {
+        network.fit({
+          animation: {
+            duration: 800,
+            easingFunction: "easeOutQuad"
+          }
+        });
+      });
+    }
+
+    // -------------------------------------------------------------
+    // NODE INSPECTOR (SLIDE-OVER CARD)
+    // -------------------------------------------------------------
+    function showNodeInspector(nodeId) {
+      const node = NEO4J_GRAPH_DATA.nodes.find(n => n.id === nodeId);
+      if (!node) return;
+      currentSelectedNodeId = nodeId;
+
+      const inspector = document.getElementById("node-inspector");
+      const titleEl = document.getElementById("inspector-title");
+      const badgeEl = document.getElementById("inspector-badge");
+      const descEl = document.getElementById("inspector-desc");
+      const propsEl = document.getElementById("inspector-props");
+      const edgesEl = document.getElementById("inspector-edges");
+      const cypherEl = document.getElementById("inspector-cypher");
+
+      titleEl.textContent = node.label.replace(/\n/g, " ");
+      badgeEl.textContent = node.group;
+
+      // Badge coloring
+      const style = GROUP_COLORS[node.group] || GROUP_COLORS.Tech;
+      badgeEl.style.backgroundColor = style.background + "25";
+      badgeEl.style.color = style.border;
+      badgeEl.style.border = `1px solid ${style.border}50`;
+
+      descEl.textContent = node.desc || "해당 노드에 등록된 세부 설명이 없습니다.";
+
+      // Properties table
+      let propsHtml = "";
+      Object.keys(node).forEach(key => {
+        if (!["id", "label", "group", "desc", "cypherExample", "arch"].includes(key)) {
+          propsHtml += `
+            <div class="flex items-center justify-between py-1 border-b border-slate-800 text-[11px]">
+              <span class="text-slate-400 capitalize">${key}</span>
+              <span class="font-mono text-white text-right max-w-[65%] truncate">${node[key]}</span>
+            </div>
+          `;
+        }
+      });
+      propsEl.innerHTML = propsHtml || '<div class="text-slate-500 text-xs">속성 없음</div>';
+
+      // Connected Edges
+      const connectedEdges = NEO4J_GRAPH_DATA.edges.filter(e => e.from === nodeId || e.to === nodeId);
+      let edgesHtml = "";
+      connectedEdges.forEach(e => {
+        const isOutbound = e.from === nodeId;
+        const otherNodeId = isOutbound ? e.to : e.from;
+        const otherNode = NEO4J_GRAPH_DATA.nodes.find(n => n.id === otherNodeId);
+        const otherName = otherNode ? otherNode.label.replace(/\n/g, " ") : otherNodeId;
+
+        edgesHtml += `
+          <button onclick="inspectConnectedNode('${otherNodeId}')" class="w-full text-left p-2 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-800 transition-colors flex items-center justify-between text-[11px] group">
+            <span class="text-slate-400 font-mono flex items-center gap-1.5">
+              <i data-lucide="${isOutbound ? 'arrow-up-right' : 'arrow-down-left'}" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span>${e.label}</span>
+            </span>
+            <span class="text-indigo-300 group-hover:text-white font-medium truncate max-w-[150px]">${otherName}</span>
+          </button>
+        `;
+      });
+      edgesEl.innerHTML = edgesHtml || '<div class="text-slate-500 text-xs">연결된 관계 없음</div>';
+
+      // Cypher Snippet
+      const cypher = `MATCH (n:${node.group} {id: "${node.id}"})-[r]-(m)\nRETURN n, r, m LIMIT 25;`;
+      cypherEl.textContent = cypher;
+
+      // Reveal Inspector
+      inspector.classList.remove("translate-x-[120%]");
+      inspector.classList.add("translate-x-0");
+
+      if (window.lucide) {
+        lucide.createIcons({ scope: inspector });
+      }
+    }
+
+    function inspectConnectedNode(nodeId) {
+      if (network) {
+        network.selectNodes([nodeId]);
+        network.focus(nodeId, {
+          scale: 1.25,
+          animation: { duration: 500, easingFunction: "easeInOutQuad" }
+        });
+      }
+      showNodeInspector(nodeId);
+    }
+
+    function closeInspector() {
+      const inspector = document.getElementById("node-inspector");
+      inspector.classList.remove("translate-x-0");
+      inspector.classList.add("translate-x-[120%]");
+      currentSelectedNodeId = null;
+    }
+
+    function copyInspectorCypher() {
+      const cypherEl = document.getElementById("inspector-cypher");
+      if (cypherEl) {
+        navigator.clipboard.writeText(cypherEl.textContent);
+        showToast("Cypher 질의가 클립보드에 복사되었습니다!");
+      }
+    }
+
+    // -------------------------------------------------------------
+    // GRAPH SEARCH & FILTERING CONTROLS
+    // -------------------------------------------------------------
+    function handleGraphSearch(e) {
+      const query = e.target.value.trim().toLowerCase();
+      if (!query || !network || !nodesDataSet) return;
+
+      const matchedNode = NEO4J_GRAPH_DATA.nodes.find(n => 
+        n.label.toLowerCase().includes(query) || 
+        n.id.toLowerCase().includes(query) ||
+        (n.desc && n.desc.toLowerCase().includes(query))
+      );
+
+      if (matchedNode) {
+        network.selectNodes([matchedNode.id]);
+        network.focus(matchedNode.id, {
+          scale: 1.35,
+          animation: { duration: 500, easingFunction: "easeInOutQuad" }
+        });
+        showNodeInspector(matchedNode.id);
+      }
+    }
+
+    function filterGraphGroup(group, targetBtn) {
+      const el = targetBtn || (window.event ? (window.event.currentTarget || window.event.target) : null);
+      document.querySelectorAll(".cat-pill").forEach(btn => {
+        btn.classList.remove("active", "bg-slate-800", "text-white");
+        btn.classList.add("bg-slate-900");
+      });
+      if (el && el.classList) {
+        el.classList.add("active", "bg-slate-800", "text-white");
+        el.classList.remove("bg-slate-900");
+      }
+
+      if (!nodesDataSet || !network) return;
+
+      if (group === "all") {
+        const allUpdates = NEO4J_GRAPH_DATA.nodes.map(n => ({ id: n.id, hidden: false }));
+        nodesDataSet.update(allUpdates);
+        edgesDataSet.update(NEO4J_GRAPH_DATA.edges.map(e => ({ id: `${e.from}->${e.to}`, hidden: false })));
+        network.fit();
+      } else {
+        const matchingNodeIds = new Set(NEO4J_GRAPH_DATA.nodes.filter(n => n.group === group || n.id === "sanghoon_kim").map(n => n.id));
+        const updates = NEO4J_GRAPH_DATA.nodes.map(n => ({
+          id: n.id,
+          hidden: !matchingNodeIds.has(n.id)
+        }));
+        nodesDataSet.update(updates);
+
+        const edgeUpdates = NEO4J_GRAPH_DATA.edges.map(e => ({
+          id: `${e.from}->${e.to}`,
+          hidden: !(matchingNodeIds.has(e.from) && matchingNodeIds.has(e.to))
+        }));
+        edgesDataSet.update(edgeUpdates);
+        network.fit();
+      }
+    }
+
+    function applyPreset(preset) {
+      if (!network || !nodesDataSet) return;
+
+      if (preset === "rag") {
+        const ragNodeIds = new Set([
+          "sanghoon_kim", "proj_graph_rag", "tech_neo4j", "tech_cypher", "tech_langchain", 
+          "tech_python", "skill_rag", "skill_ontology", "domain_genai", "metric_hallucination"
+        ]);
+        const updates = NEO4J_GRAPH_DATA.nodes.map(n => ({
+          id: n.id,
+          hidden: !ragNodeIds.has(n.id)
+        }));
+        nodesDataSet.update(updates);
+
+        const edgeUpdates = NEO4J_GRAPH_DATA.edges.map(e => ({
+          id: `${e.from}->${e.to}`,
+          hidden: !(ragNodeIds.has(e.from) && ragNodeIds.has(e.to))
+        }));
+        edgesDataSet.update(edgeUpdates);
+        network.fit({ animation: { duration: 600 } });
+        showNodeInspector("proj_graph_rag");
+        showToast("⚡ Graph RAG 생태계 서브그래프를 로드했습니다.");
+      } else {
+        const allUpdates = NEO4J_GRAPH_DATA.nodes.map(n => ({ id: n.id, hidden: false }));
+        nodesDataSet.update(allUpdates);
+        edgesDataSet.update(NEO4J_GRAPH_DATA.edges.map(e => ({ id: `${e.from}->${e.to}`, hidden: false })));
+        network.fit({ animation: { duration: 600 } });
+        closeInspector();
+        showToast("전체 네트워크 그래프를 초기화했습니다.");
+      }
+    }
+
+    function zoomGraph(factor) {
+      if (!network) return;
+      const currentScale = network.getScale();
+      network.moveTo({ scale: currentScale * factor, animation: { duration: 250 } });
+    }
+
+    function resetGraphView() {
+      if (!network) return;
+      network.fit({ animation: { duration: 500, easingFunction: "easeOutQuad" } });
+    }
+
+    function togglePhysics() {
+      if (!network) return;
+      physicsEnabled = !physicsEnabled;
+      network.setOptions({ physics: { enabled: physicsEnabled } });
+      const btn = document.getElementById("physics-toggle-btn");
+      if (btn) {
+        btn.innerHTML = `<i data-lucide="${physicsEnabled ? 'pause' : 'play'}" class="w-3.5 h-3.5"></i>`;
+        btn.className = physicsEnabled ? "p-1.5 text-emerald-400 hover:bg-slate-800 rounded" : "p-1.5 text-amber-400 hover:bg-slate-800 rounded";
+        if (window.lucide) lucide.createIcons({ scope: btn });
+      }
+      showToast(physicsEnabled ? "물리 엔진 연산을 재개했습니다." : "물리 엔진을 일시 정지했습니다.");
+    }
+
+    function focusGraphNode(nodeId) {
+      const explorerSection = document.getElementById("explorer");
+      if (explorerSection) {
+        explorerSection.scrollIntoView({ behavior: "smooth" });
+      }
+      setTimeout(() => {
+        if (network) {
+          network.selectNodes([nodeId]);
+          network.focus(nodeId, {
+            scale: 1.35,
+            animation: { duration: 600, easingFunction: "easeInOutQuad" }
+          });
+          showNodeInspector(nodeId);
+        }
+      }, 500);
+    }
+
+    // -------------------------------------------------------------
+    // PROJECT FILTERING & DETAIL MODAL
+    // -------------------------------------------------------------
+    function filterProjects(cat, targetBtn) {
+      const el = targetBtn || (window.event ? (window.event.currentTarget || window.event.target) : null);
+      document.querySelectorAll(".proj-tab-btn").forEach(btn => {
+        btn.classList.remove("active", "bg-indigo-600", "text-white");
+        btn.classList.add("text-slate-400");
+      });
+      if (el && el.classList) {
+        el.classList.add("active", "bg-indigo-600", "text-white");
+        el.classList.remove("text-slate-400");
+      }
+
+      document.querySelectorAll(".project-card").forEach(card => {
+        if (cat === "all" || card.dataset.category === cat) {
+          card.style.display = "flex";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    }
+
+    function openProjectModal(projectId) {
+      const node = NEO4J_GRAPH_DATA.nodes.find(n => n.id === projectId);
+      if (!node) return;
+
+      const modal = document.getElementById("project-modal");
+      document.getElementById("proj-modal-domain").textContent = node.domain || "Enterprise Project";
+      document.getElementById("proj-modal-title").textContent = node.label.replace(/\n/g, " ");
+      document.getElementById("proj-modal-desc").textContent = node.desc;
+      document.getElementById("proj-modal-arch").textContent = node.arch || "분산 데이터 처리 및 Neo4j 네이티브 그래프 엔진을 기반으로 구축된 고가용성 아키텍처.";
+
+      const impactEl = document.getElementById("proj-modal-impact");
+      impactEl.innerHTML = `
+        <div class="flex items-center justify-between p-3 rounded bg-slate-900 border border-slate-800">
+          <span class="text-slate-400">핵심 측정 지표</span>
+          <span class="text-emerald-400 font-bold font-mono">${node.impact || "성능 최적화 완료"}</span>
+        </div>
+      `;
+
+      document.getElementById("proj-modal-cypher").textContent = node.cypherExample || "// Cypher snippet";
+
+      const graphBtn = document.getElementById("proj-modal-graph-btn");
+      graphBtn.onclick = function() {
+        closeProjectModal();
+        focusGraphNode(projectId);
+      };
+
+      modal.classList.remove("hidden");
+    }
+
+    function closeProjectModal() {
+      document.getElementById("project-modal").classList.add("hidden");
+    }
+
+    // -------------------------------------------------------------
+    // RAW DATA MODAL (CSV & CYPHER)
+    // -------------------------------------------------------------
+    function openDataModal() {
+      // Build Nodes CSV
+      let nodesCsv = "id,label,group,role,domain,period,impact,tech\n";
+      NEO4J_GRAPH_DATA.nodes.forEach(n => {
+        const cleanLabel = (n.label || "").replace(/\n/g, " ");
+        const role = n.role || "";
+        const domain = n.domain || "";
+        const period = n.period || "";
+        const impact = (n.impact || "").replace(/,/g, ";");
+        const tech = (n.tech || "").replace(/,/g, ";");
+        nodesCsv += `"${n.id}","${cleanLabel}","${n.group}","${role}","${domain}","${period}","${impact}","${tech}"\n`;
+      });
+      document.getElementById("nodes-csv-text").textContent = nodesCsv;
+
+      // Build Edges CSV
+      let edgesCsv = "from,to,label\n";
+      NEO4J_GRAPH_DATA.edges.forEach(e => {
+        edgesCsv += `"${e.from}","${e.to}","${e.label}"\n`;
+      });
+      document.getElementById("edges-csv-text").textContent = edgesCsv;
+
+      // Build Cypher Full Seed
+      let cypher = "// ==========================================================\n";
+      cypher += "// NEO4J SEED SCRIPT - SANGHOON KIM PORTFOLIO KNOWLEDGE GRAPH\n";
+      cypher += "// ==========================================================\n\n";
+
+      cypher += "// 1. Create Nodes\n";
+      NEO4J_GRAPH_DATA.nodes.forEach(n => {
+        const cleanLabel = n.label.replace(/\n/g, " ");
+        const safeDesc = (n.desc || "").replace(/"/g, '\\"');
+        cypher += `CREATE (:${n.group} {id: "${n.id}", name: "${cleanLabel}", desc: "${safeDesc}"})\n`;
+      });
+
+      cypher += "\n// 2. Create Relationships\n";
+      NEO4J_GRAPH_DATA.edges.forEach(e => {
+        cypher += `MATCH (a {id: "${e.from}"}), (b {id: "${e.to}"}) CREATE (a)-[:${e.label}]->(b)\n`;
+      });
+
+      cypher += "\n// 3. Return Graph Verification\nMATCH (n)-[r]->(m) RETURN n, r, m LIMIT 50;";
+      document.getElementById("cypher-full-text").textContent = cypher;
+
+      document.getElementById("data-modal").classList.remove("hidden");
+    }
+
+    function closeDataModal() {
+      document.getElementById("data-modal").classList.add("hidden");
+    }
+
+    function switchDataTab(tab) {
+      document.querySelectorAll(".data-tab-btn").forEach(btn => {
+        btn.classList.remove("text-indigo-400", "border-indigo-500");
+        btn.classList.add("text-slate-400", "border-transparent");
+      });
+      document.getElementById(`tab-btn-${tab}`).classList.add("text-indigo-400", "border-indigo-500");
+      document.getElementById(`tab-btn-${tab}`).classList.remove("text-slate-400", "border-transparent");
+
+      document.getElementById("tab-content-nodes").classList.add("hidden");
+      document.getElementById("tab-content-edges").classList.add("hidden");
+      document.getElementById("tab-content-cypher").classList.add("hidden");
+
+      document.getElementById(`tab-content-${tab}`).classList.remove("hidden");
+    }
+
+    function downloadCSV(type) {
+      const text = type === "nodes" 
+        ? document.getElementById("nodes-csv-text").textContent 
+        : document.getElementById("edges-csv-text").textContent;
+      const filename = `neo4j_${type}.csv`;
+      const blob = new Blob([text], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`${filename} 파일이 다운로드되었습니다.`);
+    }
+
+    function copyCypherFull() {
+      const text = document.getElementById("cypher-full-text").textContent;
+      navigator.clipboard.writeText(text);
+      showToast("Neo4j Cypher 스크립트가 복사되었습니다!");
+    }
+
+    // -------------------------------------------------------------
+    // UTILITY: EMAIL COPY & TOAST & MOBILE MENU
+    // -------------------------------------------------------------
+    function copyEmail() {
+      const email = "hijack070916@gmail.com";
+      navigator.clipboard.writeText(email);
+      showToast("이메일 주소(hijack070916@gmail.com)가 복사되었습니다!");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      const msgEl = document.getElementById("toast-message");
+      if (!toast || !msgEl) return;
+      msgEl.textContent = msg;
+      toast.classList.remove("translate-y-24", "opacity-0");
+      toast.classList.add("translate-y-0", "opacity-100");
+
+      setTimeout(() => {
+        toast.classList.remove("translate-y-0", "opacity-100");
+        toast.classList.add("translate-y-24", "opacity-0");
+      }, 3000);
+    }
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById("mobile-menu");
+      menu.classList.toggle("hidden");
+    }
+
+    function handleContactSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById("contact-name").value;
+      const email = document.getElementById("contact-email").value;
+      const msg = document.getElementById("contact-message").value;
+
+      showToast(`${name} 님의 문의가 접수되었습니다. 곧 회신드리겠습니다!`);
+
+      // Trigger mailto fallback
+      const mailtoUrl = `mailto:hijack070916@gmail.com?subject=[포트폴리오 문의] ${encodeURIComponent(name)}&body=${encodeURIComponent(msg + "\n\n회신처: " + email)}`;
+      setTimeout(() => {
+        window.location.href = mailtoUrl;
+      }, 1000);
+
+      e.target.reset();
+    }
+
+    // Global Keydown: ESC closes modals
+    window.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+        closeInspector();
+        closeProjectModal();
+        closeDataModal();
+      }
+    });
+
+    // Initialize Network on DOM Load
+    document.addEventListener("DOMContentLoaded", function() {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+      initNetwork();
+    });
+  </script>
+</body>
+</html>
